@@ -10,6 +10,20 @@ if (process.browser) {
 
   var lorem =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam in suscipit purus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Vivamus nec hendrerit felis. Morbi aliquam facilisis risus eu lacinia. Sed eu leo in turpis fringilla hendrerit. Ut nec accumsan nisl. Suspendisse rhoncus nisl posuere tortor tempus et dapibus elit porta. Cras leo neque, elementum a rhoncus ut, vestibulum non nibh. Phasellus pretium justo turpis. Etiam vulputate, odio vitae tincidunt ultricies, eros odio dapibus nisi, ut tincidunt lacus arcu eu elit. Aenean velit erat, vehicula eget lacinia ut, dignissim non tellus. Aliquam nec lacus mi, sed vestibulum nunc. Suspendisse potenti. Curabitur vitae sem turpis. Vestibulum sed neque eget dolor dapibus porttitor at sit amet sem. Fusce a turpis lorem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;\nMauris at ante tellus. Vestibulum a metus lectus. Praesent tempor purus a lacus blandit eget gravida ante hendrerit. Cras et eros metus. Sed commodo malesuada eros, vitae interdum augue semper quis. Fusce id magna nunc. Curabitur sollicitudin placerat semper. Cras et mi neque, a dignissim risus. Nulla venenatis porta lacus, vel rhoncus lectus tempor vitae. Duis sagittis venenatis rutrum. Curabitur tempor massa tortor.";
+  // create a download
+  const a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+  let blob;
+  function download() {
+    if (!blob) return;
+    var url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = "test.pdf";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+  window.downloadPDF = download;
 
   function makePDF(PDFDocument, blobStream, lorem, iframe) {
     // create a document and pipe to a blob
@@ -67,6 +81,7 @@ if (process.browser) {
     // end and display the document in the iframe to the right
     doc.end();
     stream.on("finish", function () {
+      blob = stream.toBlob("application/pdf");
       iframe.src = stream.toBlobURL("application/pdf");
     });
   }
@@ -102,6 +117,11 @@ export default function pdfkit() {
   return (
     <div>
       <p>pdfkit</p>
+      {process.browser && (
+        <div>
+          PDF Output <button onClick={window.downloadPDF}>Download</button>
+        </div>
+      )}
       <div id="editor"></div>
       <iframe width="600" height="775"></iframe>
     </div>
